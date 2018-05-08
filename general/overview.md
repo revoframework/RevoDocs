@@ -6,45 +6,45 @@ Revo is an application framework for modern C\#/.NET applications building on th
 
 The framework combines the concepts of event sourcing, CQRS and DDD to provide support for building applications that are scalable, maintainable, can work in distributed environments and are easy to integrate with outside world. As such, it take some rather opinionated approaches on the design of certain parts of its architecture. Revo also incorporates some other features and infrastructure that is often necessary for building complete applications using the mentioned architectural patterns – for example, data-access, authorization, validation, messaging integration, multi-tenancy or testing. Its extensions can also provide other features like entity history change-tracking, auditing or user notifications.
 
-[**Domain-Driven Design**](../guide/domain-building-blocks.md)**  
+[**Domain-Driven Design**](../reference-guide/domain-building-blocks.md)**  
 **Building blocks for rich DDD-style domain models \(aggregates, entities, domain events, repositories...\).
 
-[**Event Sourcing**](../guide/event-processing.md)**  
+[**Event Sourcing**](../reference-guide/events.md)**  
 **Implementing event-sourced entity persistence with multiple backends \(just _MSSQL_ for now\).
 
-[**CQRS**](../guide/untitled.md)  
+[**CQRS**](../reference-guide/commands-and-queries.md)  
 Segregating command and query responsibilities with:
 
-* [Commands and queries  ](../guide/untitled.md#commands-queries)
-* Command/query [handlers  ](../guide/untitled.md#command-query-handlers)
-* Processing pipeline with filters for cross-cutting concerns \([authorization](../guide/authorization.md), [validation](../guide/validation.md), etc.\)
-* [Different read/write models](../guide/projections.md)
+* [Commands and queries  ](../reference-guide/commands-and-queries.md#commands-queries)
+* Command/query [handlers  ](../reference-guide/commands-and-queries.md#command-query-handlers)
+* Processing pipeline with filters for cross-cutting concerns \([authorization](../reference-guide/authorization.md), [validation](../reference-guide/validation.md), etc.\)
+* [Different read/write models](../reference-guide/projections.md)
 
-[**A/synchronous event delivery**](../guide/event-processing.md)**  
-**Support for both [synchronous](../guide/event-processing.md#synchronous-event-processing) and [asynchronous](../guide/event-processing.md#asynchronous-event-processing) event delivery, guaranteed _at-least-once_ delivery, event queues with strict sequence ordering \(optionally\), event source catch-ups, optional [pseudo-synchronous event dispatch](../guide/event-processing.md#pseudo-synchronous-event-dispatch) for listeners \(projectors, for example\).
+[**A/synchronous event delivery**](../reference-guide/events.md)**  
+**Support for both [synchronous](../reference-guide/events.md#synchronous-event-processing) and [asynchronous](../reference-guide/events.md#asynchronous-event-processing) event delivery, guaranteed _at-least-once_ delivery, event queues with strict sequence ordering \(optionally\), event source catch-ups, optional [pseudo-synchronous event dispatch](../reference-guide/events.md#pseudo-synchronous-event-dispatch) for listeners \(projectors, for example\).
 
-[**Data access**](../guide/data-persistence.md)**  
+[**Data access**](../reference-guide/data-persistence.md)**  
 **Abstraction layer for _Entity Framework 6_, _RavenDB,_ testable _in-memory database_ or other data providers.
 
-[**Projections**](../guide/projections.md)**  
+[**Projections**](../reference-guide/projections.md)**  
 **Support for read-model projections with various backends** **\(e.g. _MSSQL_/_Entity Framework 6_, _RavenDB_...\), automatic idempotency- and concurrency-handling, etc.
 
-[**SOA and integration**](../guide/integrations.md)**  
+[**SOA and integration**](../reference-guide/integrations.md)**  
 **Scale and integrate by publishing and receiving events, commands and queries using common messaging patterns, e.g. with _RabbitMQ_ message queue and/or uses _Rebus_ service bus.
 
-[**Sagas**](../guide/sagas.md)**  
+[**Sagas**](../reference-guide/sagas.md)**  
 **Coordinating long-running processes or inter-aggregate cooperation with sagas that react to events \(a.k.a. _process managers_\).
 
-[**Authorization**](../guide/authorization.md)**  
+[**Authorization**](../reference-guide/authorization.md)**  
 **Basic permission/role-based ACL for commands and queries, fine-grained row filtering.
 
 **Other minor features:  
-**	[**Validation**](../guide/validation.md) for commands, queries and other structures  
-	[**Jobs**](../guide/jobs.md)  
-	[**Multi-tenancy**](../guide/multi-tenancy.md)**  
-**[	**Event message metadata**](../guide/event-processing.md#event-messages-and-metadata)**  
+**	[**Validation**](../reference-guide/validation.md) for commands, queries and other structures  
+	[**Jobs**](../reference-guide/jobs.md)  
+	[**Multi-tenancy**](../reference-guide/multi-tenancy.md)**  
+**[	**Event message metadata**](../reference-guide/events.md#event-messages-and-metadata)**  
 **	[**Event versioning  
-**](../guide/event-processing.md#event-versioning)	**History and change-tracking  
+**](../reference-guide/events.md#event-versioning)	**History and change-tracking  
 **	**User notifications:** event-based, with mail/APNS/FCM output channels, supporting aggregation, etc.  
 	**ASP.NET support** \(ASP.NET Core coming soon...\)
 
@@ -54,7 +54,7 @@ Following diagram depicts the data flows during a typical processing of a reques
 
 ![Data flows during a typical request processing in Revo.](../.gitbook/assets/revo_request_processing_data_flows-3%20%282%29.png)
 
-To learn more about the request processing in Revo, see the [related chapter](../guide/request-life-cycle.md).
+To learn more about the request processing in Revo, see the [related chapter](../reference-guide/request-life-cycle.md).
 
 ## Requirements
 
@@ -67,7 +67,7 @@ The framework codebase is split into a number of submodules \(Visual Studio proj
 * **Core**
   * **Revo.Core **Implements framework’s core features like events or commands and defines basic struc-tures and interfaces for things like the unit of work pattern, security permissions and other utilities.
   * **Revo.Domain **Defines most of the framework’s building blocks for an application domain model – i.e. aggregates, entities, sagas, etc.
-  * **Revo.Testing** Provides several useful facilities for easier application testing – e.g. assertions for event-sourced aggregates or fake repositories \(refer to the [Testing](../guide/testing.md) chapter\).
+  * **Revo.Testing** Provides several useful facilities for easier application testing – e.g. assertions for event-sourced aggregates or fake repositories \(refer to the [Testing](../reference-guide/testing.md) chapter\).
   * **DataAccess**
     * **Revo.DataAccess** Lower-level data access layer that provides interfaces and other abstractions for working with databases. Not dependent on domain concepts \(aggregates, con-sistency boundaries, etc.\).
     * **Revo.DataAcess.EF6       **Data access layer implementation using Entity Framework 6. Provides also some facilities for easier entity mapping.
