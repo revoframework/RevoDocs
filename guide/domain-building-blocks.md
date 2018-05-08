@@ -91,5 +91,5 @@ As already mentioned, it is also possible to compose the aggregate roots and ent
 
 ## Sagas
 
-The framework implements a comprehensive support for long-running process coordination using sagas. Thanks to this support, sagas can be considered first-class citizens of the domain model. Because of complexity of this topic, there is a [separate chapter](domain-building-blocks.md#sagas) dedicated to them.
+The framework implements a comprehensive support for long-running process coordination using sagas. Thanks to this support, sagas can be considered first-class citizens of the domain model. Because of complexity of this topic, there is a [separate chapter](sagas.md) dedicated to them.
 
