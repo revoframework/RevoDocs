@@ -6,7 +6,7 @@ Events are one of the basic ways of communication used in Revo framework. To mak
 
 ### Overview
 
-Framework defines a generic event listener IEventListener&lt;TEvent&gt; interface. Event can be any plain object that implements the IEvent interface \(which itself is empty in its definition\). 
+Framework defines a generic event listener `IEventListener<TEvent>` interface. Event can be any plain object that implements the IEvent interface \(which itself is empty in its definition\). 
 
 ```csharp
 public interface IEvent
