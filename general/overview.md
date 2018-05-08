@@ -1,6 +1,6 @@
 # Overview
 
-Revo is an application framework for modern C\#/.NET applications building on the foundations of _event sourcing_, _CQRS_ and _DDD_.
+Revo is an application framework for modern C\#/.NET applications built with _event sourcing_, _CQRS_ and _DDD_.
 
 ## Features
 
