@@ -4,7 +4,7 @@ Revo is an application framework for modern C\#/.NET applications built with _ev
 
 ## Features
 
-The framework combines the concepts of event sourcing, CQRS and DDD to provide support for building applications that are scalable, maintainable, can work in distributed environments and are easy to integrate with outside world. As such, it take some rather opinionated approaches on the design of certain parts of its architecture. Revo also incorporates some other features and infrastructure that is often necessary for building complete applications using the mentioned architectural patterns – for example, data-access, authorization, validation, messaging integration, multi-tenancy or testing. Its extensions can also provide other features like entity history change-tracking, auditing or user notifications.
+ The framework combines the concepts of event sourcing, CQRS and DDD to provide support for building applications that are scalable, maintainable, can work in distributed environments and are easy to integrate with outside world. As such, it takes some rather opinionated approaches on the design of certain parts of its architecture. Revo also offers other common features and infrastructure that is often necessary for building complete applications – for example, authorizations, validations, messaging, integrations, multi-tenancy or testing. Furthermore, its extensions implement other useful features like entity history change-tracking, auditing or user notifications.
 
 [**Domain-Driven Design**](../reference-guide/domain-building-blocks.md)**  
 **Building blocks for rich DDD-style domain models \(aggregates, entities, domain events, repositories...\).
