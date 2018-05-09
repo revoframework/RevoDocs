@@ -20,8 +20,8 @@ Segregating command and query responsibilities with:
 * Processing pipeline with filters for cross-cutting concerns \([authorization](../reference-guide/authorization.md), [validation](../reference-guide/validation.md), etc.\)
 * [Different read/write models](../reference-guide/projections.md)
 
-[**A/synchronous event delivery**](../reference-guide/events.md)**  
-**Support for both [synchronous](../reference-guide/events.md#synchronous-event-processing) and [asynchronous](../reference-guide/events.md#asynchronous-event-processing) event delivery, guaranteed _at-least-once_ delivery, event queues with strict sequence ordering \(optionally\), event source catch-ups, optional [pseudo-synchronous event dispatch](../reference-guide/events.md#pseudo-synchronous-event-dispatch) for listeners \(projectors, for example\).
+[**A/synchronous event processing**](../reference-guide/events.md)**  
+**Support for both [synchronous](../reference-guide/events.md#synchronous-event-processing) and [asynchronous](../reference-guide/events.md#asynchronous-event-processing) event processing, guaranteed _at-least-once_ delivery, event queues with strict sequence ordering \(optionally\), event source catch-ups, optional [pseudo-synchronous event dispatch](../reference-guide/events.md#pseudo-synchronous-event-dispatch) for listeners \(projectors, for example\).
 
 [**Data access**](../reference-guide/data-persistence.md)**  
 **Abstraction layer for _Entity Framework 6_, _RavenDB,_ testable _in-memory database_ or other data providers.
