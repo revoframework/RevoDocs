@@ -164,7 +164,7 @@ These catch-ups are ran regularly:
 * 	During the application start-up, before processing of any new requests starts.
 * 	Periodically in pre-defined \(configured\) time intervals. 
 
-This ensures that all event sources get eventually back into a synchronized state. As noted before, while the regular event-processing path in the success-case scenarios works completely as a _push-based _mechanism \(i.e. the events get propagated throughout the pipeline actively by their initiator at the time they are created\), which usually should have better efficiency in the use-case mentioned, the catch-ups resort to employing different _pull-based approach _when loading events from the event store.
+This ensures that all event sources get eventually back into a synchronized state. As noted before, while the regular event-processing path in the success-case scenarios works completely as a _push-based_ mechanism \(i.e. the events get propagated throughout the pipeline actively by their initiator at the time they are created\), which usually should have better efficiency in the use-case mentioned, the catch-ups resort to employing different _pull-based approach_ when loading events from the event store.
 
 {% hint style="info" %}
 Despite the fact that catch-ups could also deliver events to synchronous event listeners, it was decided they would rather not. This design decision stems from the fact that synchronous dispatchers cannot safely guarantee some other delivery properties \(like ordering\) and thus they should be kept completely that way with no delivery guarantees altogether to make a clear distinction from asynchronous events. Therefore, they should only be used for actions that have transient effects.

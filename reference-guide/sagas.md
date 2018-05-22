@@ -43,7 +43,7 @@ The `SagaMethodAttribute` specifies what saga instances should the event be sent
 [SagaEvent]
 ```
 
-* Find all existing sagas **and **start a new one if none were found.
+* Find all existing sagas **and** start a new one if none were found.
 
 ```csharp
 [SagaEvent(IsStartingIfSagaNotFound = true)]

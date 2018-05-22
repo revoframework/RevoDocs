@@ -1,6 +1,6 @@
 # Projections
 
-It s a practical requirement for most applications with event sourcing to also maintain a co-existent read model for the needs of the query side of the applications \(client user-interfaces, reporting, etc.\). The objects that take care of creating and updating \(or deleting\) read models are called _projectors _\(as they project the effects of the events into some other form\) and the process itself a _projection _\(which might sometimes also be used for the resulting generated model\).
+It s a practical requirement for most applications with event sourcing to also maintain a co-existent read model for the needs of the query side of the applications \(client user-interfaces, reporting, etc.\). The objects that take care of creating and updating \(or deleting\) read models are called _projectors_ \(as they project the effects of the events into some other form\) and the process itself a _projection_ \(which might sometimes also be used for the resulting generated model\).
 
 ## Entity event projections
 
@@ -38,7 +38,7 @@ Building on top of the previously introduced EntityEventToPocoProjector, project
 
 •	`EF6CrudEntityEventToPocoProjector<TSource, TTarget>` and
 
-•	`RavenCrudEntityEventToPocoProjector<TSource, TTarget>`
+•	`RavenCrudEntityEventToPocoProjector<TSource, TTarget>`
 
 add some additional features for easier generation of read models. They are all backed by their corresponding `ICrudRepository` repositories and create the read model instances with its default constructor. Moreover, they implement following features.
 
