@@ -139,7 +139,7 @@ Please be aware that because the hash codes should usually be constant for an ob
 
 ### Collection value helpers
 
-Note that the GetValueComponents method is expected to return objects which correctly implements its Equals/GetHashCode/ToString methods. While this will be by default true for most of the C\# language primitives \(e.g. number types, strings, etc.\), it does not hold up for the collections types \(e.g. lists, dictionaries or sets\) which use the default class by-reference comparisons. To be able to correctly use them in value objects, the framework defines a number of helpers in which wrap them as a value. `CollectionAsValueExtensions` implements the following extension methods \(abridged code snippet\):
+Note that the GetValueComponents method is expected to return objects which correctly implement their Equals/GetHashCode/ToString methods. While this will be true by default for most of the C\# language primitives \(e.g. number types, strings, etc.\), it does not hold up for the collections types \(e.g. lists, dictionaries or sets\) which use the default class by-reference comparisons. To be able to correctly use them in value objects, the framework defines a number of helpers which wrap them as a value. `CollectionAsValueExtensions` implements the following extension methods \(abridged code snippet\):
 
 ```csharp
 public static class CollectionAsValueExtensions
