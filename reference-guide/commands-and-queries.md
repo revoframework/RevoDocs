@@ -93,5 +93,5 @@ public interface IExceptionCommandFilter<in T>
 }
 ```
 
-These filters get automatically invoked when registered in the dependency container for a specific command \(base\) type. The framework uses them to deal with concerns like authori-zation or automatic unit-of-work management, but it is also possible to define custom application’s own filters.
+These filters get automatically invoked when registered in the dependency container for a specific command \(base\) type. The framework uses them to deal with concerns like authorization or automatic unit-of-work management, but it is also possible to define custom application’s own filters.
 

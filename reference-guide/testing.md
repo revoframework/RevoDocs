@@ -18,7 +18,7 @@ To make testing of event-sourced entities less verbose and correctly test of all
 
 ### EventSourcedEntityTestingHelpers
 
-Method `AssertEvents` asserts that given an initial object state and an action performed, it publishes an array of specified events and possibly also asserts the final state of the object with a custom function. If loadEventsOnly is specified true, it only replays the events speci-fied and verifies the final state.
+Method `AssertEvents` asserts that given an initial object state and an action performed, it publishes an array of specified events and possibly also asserts the final state of the object with a custom function. If loadEventsOnly is specified true, it only replays the events specified and verifies the final state.
 
 ```csharp
 static void AssertEvents<T>(this T aggregate, Action<T> action,
