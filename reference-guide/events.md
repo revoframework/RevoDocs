@@ -37,9 +37,9 @@ public class ShoppingCartItemAddedEvent : IEvent
 		Amount = amount;
 	}
 	
-	public Guid CustomerId { get; private set; }
-	public Guid ItemId { get; private set; }
-	public int Amount { get; private set; }
+	public Guid CustomerId { get; }
+	public Guid ItemId { get; }
+	public int Amount { get; }
 }
 ```
 
@@ -110,8 +110,8 @@ public class PageBookmarkedEvent : IEvent
 	    FolderName = folderName;
 	}
 	
-	public string PageUrl { get; private set; }
-	public string FolderName { get; private set; } // added new attribute in V2
+	public string PageUrl { get; }
+	public string FolderName { get; } // added new attribute in V2
 }
 ```
 
@@ -123,7 +123,7 @@ public class PageBookmarkedEventV1 : IEvent
 	    PageUrl = pageUrl;
 	}
 	
-	public string PageUrl { get; private set; }
+	public string PageUrl { get; }
 }
 ```
 
