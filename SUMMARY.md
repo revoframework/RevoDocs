@@ -11,6 +11,8 @@
 
 ## Reference guide
 
+* [Configuration](reference-guide/configuration.md)
+* [Dependency injection](reference-guide/dependency-injection.md)
 * [Domain building blocks](reference-guide/domain-building-blocks.md)
 * [Commands and queries](reference-guide/commands-and-queries.md)
 * [Events](reference-guide/events.md)
