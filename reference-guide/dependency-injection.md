@@ -13,7 +13,7 @@ Upon the start of an application, the framework automatically locates and loads 
 
 This behavior can be suppressed by decorating the module class with `[AutoLoadModule(false)]` attribute. This can be furthermore overridden \(disabling implicitly enabled or re-enabling previously disabled modules\) using the DI kernel [configuration API](configuration.md), e.g.:
 
-```aspnet
+```csharp
 new RevoConfiguration()
     ...
     .OverrideModuleLoading<XyzModule>(true);

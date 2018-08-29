@@ -19,7 +19,7 @@ Typically, the configuration object would be created at an application entry poi
 
 In ASP.NET applications, this would be the inside a `RevoHttpApplication`, e.g.:
 
-```aspnet
+```csharp
 public class MvcApplication : RevoHttpApplication
 {
     protected override IRevoConfiguration CreateRevoConfiguration()
