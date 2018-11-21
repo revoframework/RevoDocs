@@ -10,6 +10,8 @@ description: >-
 
 This part shows how to define an event, implement an event listener, register it and publish an event in the simplest manner. Further elaboration on how the system works is provided in later chapters.
 
+Please note that this is primarily intended for more advanced usage scenarios or learning the framework architecture and that you generally don't need to write own listeners when you want to use projections and that you don't need to manually publish events if you publish them from your aggregates.
+
 ### Define an event
 
 ```csharp
