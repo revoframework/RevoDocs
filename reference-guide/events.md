@@ -1,10 +1,148 @@
+---
+description: >-
+  Events are one of the basic ways of communication used in Revo. The framework
+  offers various ways for implementing an event-driven architecture.
+---
+
 # Events
 
-## Event basics
+## Quick start
 
-Events are one of the basic ways of communication used in Revo framework. To make this event-driven architecture possible, it offers a number of facilities to work with them.
+This part shows how to define an event, implement an event listener, register it and publish an event in the simplest manner. Further elaboration on how the system works is provided in later chapters.
 
-### Overview
+### Define an event
+
+```csharp
+public class ShoppingCartItemAddedEvent : IEvent
+{
+	public ShoppingCartItemAddedEvent(Guid customerId, Guid itemId, int amount)
+	{
+	    CustomerId = customerId;
+		ItemId = itemId;
+		Amount = amount;
+	}
+	
+	public Guid CustomerId { get; }
+	public Guid ItemId { get; }
+	public int Amount { get; }
+}
+```
+
+### Implement an event listener
+
+* **I need at-least-once delivery and event processing order guarantees.** __→ Implement an async event listener along with an event sequencer:
+
+```csharp
+public class ShoppingCartEventListener :
+    IAsyncEventListener<ShoppingCartItemAddedEvent>
+{
+    private readonly IMarketingServiceApi marketingServiceApi;
+
+    public SubmissionProcessingEventListener(SubmissionProcessingEventSequencer eventSequencer,
+        IMarketingServiceApi marketingServiceApi)
+    {
+        EventSequencer = eventSequencer;
+        this.marketingServiceApi = marketingServiceApi;
+    }
+
+    public async Task HandleAsync(IEventMessage<ShoppingCartItemAddedEvent> message, string sequenceName)
+    {
+        await marketingServiceApi.NotifyCustomerIsInterestedAsync(
+            message.Event.CustomerId,
+            message.Event.ItemId);
+    }
+
+    public Task OnFinishedEventQueueAsync(string sequenceName)
+    {
+        return Task.CompletedTask;
+    }
+
+    public IAsyncEventSequencer EventSequencer { get; }
+
+    public class SubmissionProcessingEventSequencer : AsyncEventSequencer<ShoppingCartItemAddedEvent>
+    {
+        public readonly string QueueNamePrefix = "ShoppingCartEventListener:";
+
+        protected override IEnumerable<EventSequencing> GetEventSequencing(IEventMessage<ShoppingCartItemAddedEvent> message)
+        {
+            yield return new EventSequencing()
+            {
+                SequenceName = QueueNamePrefix + message.Event.AggregateId.ToString(),
+                EventSequenceNumber = message.Metadata.GetStreamSequenceNumber()
+            };
+        }
+
+        protected override bool ShouldAttemptSynchronousDispatch(IEventMessage<ShoppingCartItemAddedEvent> message)
+        {
+            return false;
+        }
+    }
+}
+```
+
+* **I don't care about these or don't want the overhead of async events** \(typically only a few usage scenarios, see following chapters for details\). → Implement a regular event listener:
+
+```csharp
+public class ShoppingCartEventHandler
+   : IEventHandler<ShoppingCartItemAddedEvent>
+{
+	public ShoppingCartEventHandler()
+	{
+	}
+	
+	public Task HandleAsync(IEventMessage<ShoppingCartItemAddedEvent> message, CancellationToken cancellationToken)
+	{
+		Console.WriteLine($"Hey, a customer is interested in a product: {message.Event.ItemId}!");
+	}
+}
+```
+
+### Register the event listener
+
+```csharp
+public class MyModule : NinjectModule
+{
+    public override void Load()
+    {
+        // when using async listener
+        Bind<IAsyncEventSequencer<ShoppingCartItemAddedEvent>, ShoppingCartEventHandler.SubmissionProcessingEventSequencer>()
+            .To<ShoppingCartEventHandler.SubmissionProcessingEventSequencer>()
+            .InTaskScope();
+
+            Bind<IAsyncEventListener<ShoppingCartItemAddedEvent>>()
+            .To<ShoppingCartEventHandler>()
+            .InTaskScope();
+        
+        // when using regular listener
+        Bind<IEventListener<ShoppingCartItemAddedEvent>>()
+            .To<ShoppingCartEventHandler>()
+            .InTaskScope();
+    }
+}
+```
+
+### Publish the event
+
+```csharp
+IEventBus eventBus = ...;
+
+// ... somewhere later in code ...
+
+await eventBus.PublishAsync(
+    EventMessage.FromEvent(
+        new ShoppingCartItemAddedEvent(
+            Guid.Parse("1DCF3A44-6343-48C9-8E34-A8C8C8F0D26F"),
+            Guid.Parse("2AEEB591-53BF-4DE8-90FD-DBBDF3C7FFE1"),
+            1),
+        new Dictionary<string, string>()
+        {
+            { BasicEventMetadataNames.EventSourceName, "SupplierApi@1.2.3.4" }
+        }));
+```
+
+## General overview
+
+### Events and listeners
 
 Framework defines a generic event listener `IEventListener<TEvent>` interface. Event can be any plain object that implements the IEvent interface \(which itself is empty in its definition\). 
 
@@ -23,7 +161,7 @@ public interface IEventListener<in T>
 }
 ```
 
-Because the generic event parameter in the event listener interface is defined as contravariant and so is the actual listener resolving mechanism under the hood of default event bus implementation, it is also possible to listen for more general base types of events \(e.g. it is `DomainEvent` listener will also receive events of type `DomainAggregateEvent` and all types derived from it\). Single event type can be handled by an unlimited amount of event handlers that should be registered in the dependency container \(their order of invocation is not guaranteed in any way\).
+Because the generic event parameter in the event listener interface is defined as contravariant and so is the actual listener resolving mechanism under the hood of default event bus implementation, it is also possible to listen for more general base types of events \(e.g. `DomainEvent` listener will also receive events of type `DomainAggregateEvent` and all types derived from it\). Single event type can be handled by any amount of event handlers, which are registered using the dependency container \(their order of invocation is not guaranteed in any way\).
 
 An example of an event with a corresponding event handler can be found below.
 
@@ -44,25 +182,14 @@ public class ShoppingCartItemAddedEvent : IEvent
 ```
 
 ```csharp
-public class ShoppingCartEventHandler
-   : IEventHandler<ShoppingCartItemAddedEvent>
-{
-	public ShoppingCartEventHandler()
-	{
-	}
-	
-	public Task HandleAsync(IEventMessage<ShoppingCartItemAddedEvent> message, CancellationToken cancellationToken)
-	{
-		Console.WriteLine($"Hey, a customer is interested in a product: {message.Event.ItemId}!");
-	}
-}
+
 ```
 
-As can be seen in the previous code listing, it is considered a good practice to make the event classes immutable in order to ensure their data never changes once they are created \(event immutability is further discussed in chapter 2.5\).
+As can be seen in the previous code listing, it is considered a good practice to make the event classes immutable in order to ensure their data never changes once they are created.
 
 ### Event messages and metadata
 
-It is worth mentioning that the HandleAsync does not take the event itself as an argument, but rather an event message \(`IEventMessage<T>`\). Event message is an envelope wrapping the event with additional metadata that may not be primarily important for the domain \(i.e. they are not a part of the event’s definition on its own\), but still might be necessary under some circumstances \(especially when consuming the events outside of the domain model core\). This allows to keep the event type definitions simple and clean of things unrelated to their purpose from the domain perspective.
+The HandleAsync does not take the event itself as an argument, but rather an event message \(`IEventMessage<T>`\). Event message is an envelope wrapping the event with additional metadata that may not be primarily important for the domain \(i.e. they are not a part of the event’s definition on its own\), but still might be needed elsewhere \(especially when consuming the events outside of the domain model core\). This allows to keep the event type definitions simple and clean of things unrelated to their purpose from the domain perspective.
 
 ```csharp
 public interface IEventMessage
@@ -80,7 +207,7 @@ public interface IEventMessage<out TEvent> : IEventMessage
 
 These additional metadata are represented in form of a string key-value dictionary. Notable examples of such metadata include timestamp or event stream sequence number but might also optionally include other data used solely for other purposes like debugging, for example the name of the machine, that first created the event, or the command and URI of the sever request that triggered the creation of the event. The names for the predefined event metadata keys are defined in class `BasicEventMetadataNames`.
 
-Additional metadata can be appended to event messages by registering new implementations of `IEventMetadataProvider` in the DI container. Using those providers, the actual event message is constructed by the `EventMessageFactory` whenever needed.
+Additional metadata can be appended to event messages by registering new implementations of `IEventMetadataProvider` in the DI container. These providers are invoked by the `EventMessageFactory` when the event messages get constructed \(i.e. typically before saving to event store or sending to other connected systems\).
 
 ### Event bus
 
@@ -131,15 +258,23 @@ Note that this does not replace the old instances of the event \(not yet - like 
 
 ## Synchronous event processing
 
-The flow of events from the publisher via event bus to listeners is the basic way of processing events that is supported by the framework. As such, it is also completely synchronous – meaning that all the listeners are invoked sequentially, one-by-one, in a synchronous manner. This possesses all disadvantages previously discussed in chapter 6.5. No following listener is invoked before all preceding listeners have finished processing of the event. That also means that the event publishing interrupts any further processing of the request that originally caused publishing of the event. This is the way the default event bus is implemented when using `IEventListener<TEvent>` interfaces for handling the events. It is, however, not the only way events can be processed in Revo framework.
+The flow of events from publisher to regular listeners \(`IEventListener<TEvent>`\) via the event bus is the basic way of processing events that is implemented by the framework. As such, it is completely synchronous – meaning that all the listeners are invoked sequentially, one-by-one and without guaranteed order, in a synchronous manner. Because of their nature, synchronous event listeners posess _no delivery guarantees_ and should _rarely be used_ in actual application code \(possible valid use cases include notifications that only have transient effects\).
+
+{% hint style="info" %}
+No synchronous listener is invoked before all preceding listeners have finished processing of the event. Furthermore, if any of the listeners fails, following listeners will not get invoked. This also impedes system performance in situations where multiple listeners could have been ran in parallel and also means that the entire processing stalls any further processing of the \(HTTP\) request whose handling originally caused publishing of the event.
+{% endhint %}
+
+{% hint style="success" %}
+The distinction between synchronous and asynchronous event processing made here _does not refer_ to the`async/await`features of C\# \(the Task Asynchronous Pattern ak TAP; in fact, most of the framework codebase is already _async all the way_\), but rather to the a/synchronicity of the event delivery and processing itself in regard to the event publishing and to other listeners.
+{% endhint %}
 
 ## Asynchronous event processing
 
-This framework introduces a concept of asynchronous events as a method for dealing with all kinds of these issues. Akin to their synchronous counterparts, asynchronous \(or just async for short\) listeners are defined by implementing `IAsyncListener<TEvent>` for the specific event type or base type. Events asynchronously delivered via this interface are a bit different in their nature when compared to the events delivered using the regular \(synchronous\) event pipeline.
+This framework introduces the concept of asynchronous listeners as a more practical approach to event processing, effectively dealing with the issues that synchronous listeners have. Akin to their synchronous counterparts, asynchronous \(or just async for short\) listeners are defined by implementing `IAsyncListener<TEvent>` for the specific event \(base\) type and registered using the dependency container. Events asynchronously delivered via this interface are a bit different in their nature when compared to the events delivered using the regular \(synchronous\) event pipeline.
 
 Firstly, asynchronous events have guaranteed delivery. This means that once an event gets accepted for the asynchronous processing, it will be delivered at least once \(a.k.a. _at-least-once delivery_\). For practical reasons, the system does not guarantee if the event gets delivered once or more than once and naturally it cannot guarantee when will the actual delivery happen. This is achieved using an intermediate persistent buffer to store the events that have not been fully processed \(with all registered asynchronous listeners\) yet. If an event listener was to fail, the asynchronous event processor can always retry later using this saved data.
 
-Another important aspect previously discussed in regard to the asynchronous nature of event processing was ordering of the events delivered. In order to be able to guarantee that the listeners will always receive events in order \(if they signal they need to, as this may not be a requirement for all asynchronous listeners\), the system works with asynchronous event queues. With those, every async event listener is able to define its event sequencing requirements for every particular event. To do so, listeners register their own event sequencers. When the async processing of an event begins, the event dispatcher calls all of these registered sequencers. An event sequencer primarily defines two properties – which event sequence\(s\) it wants to use for the event \(which in turn implies the event queue it will be pushed to\) and what sequence number\(s\) will it assign to that event. Based on that information, the event dispatcher subsequently creates corresponding event queues \(if it does not exist already\) and pushes the event to them. Later when an event backlog worker gets to process any of the queues, it iterates through all the events queued in it, ordered by their sequence number, and passes them to corresponding async event listener\(s\). When the backlog worker is done, it removes the events that were successfully processed from that queue. If processing of any of the events fails, it stays in the queue until the problem gets resolved and event successfully processed.
+Another important aspect previously discussed in regard to the asynchronous nature of event processing was ordering of the events delivered. In order to be able to guarantee that the listeners will always receive events in order \(if they signal they need to, as this may not be a requirement for all asynchronous listeners\), the system works with asynchronous event queues. With those, every async event listener is able to define its event sequencing requirements for every particular event. To do so, every async listener also needs to register its own event sequencer \(`IEventSequencer<TEvent>`\). When the async processing of an event begins, the event dispatcher calls all of these registered sequencers. An event sequencer primarily defines two properties – which event sequence\(s\) it wants to use for the event \(which in turn implies the event queue it will be pushed to\) and what sequence number\(s\) will it assign to that event. Based on that information, the event dispatcher subsequently creates corresponding event queues \(if it does not exist already\) and pushes the event to them. Later when an event backlog worker gets to process any of the queues, it iterates through all the events queued in it, ordered by their sequence number, and passes them to corresponding async event listener\(s\). When the backlog worker is done, it removes the events that were successfully processed from that queue. If processing of any of the events fails, it stays in the queue until the problem gets resolved and event successfully processed.
 
 There is an important property of all event queues, which is that they always remember the sequence number of last successfully processed event \(which gets updated in a transactional manner when events get dequeued from it\). As long as there are gaps in the event sequence \(at the beginning or possibly in the middle\), the worker will block their processing until the sequence is fixed. Similarly, if the worker encounters events with sequence number lower than the number of last event processed in the queue, it skips them to avoid duplication of work \(thus providing certain degree of idempotency\). Once the sequence becomes fixed again and a worker starts processing the queue again, it dispatches both older events that were backlogged in the queue and the latest events that just got pushed to the queue in a single batch. This has several repercussions to the application design, but also automatically provides strong guarantees for the listeners that need it.
 

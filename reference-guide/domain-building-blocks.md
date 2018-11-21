@@ -2,7 +2,9 @@
 
 The domain model is one of the integral parts of applications practicing domain-driven design where most of their business logic resides. Because the implementation of the DDD is not a trivial task, the framework includes a number of basic building blocks for the model implementation.
 
+{% hint style="info" %}
 In most of the cases where working with identities, Revo framework takes an opinionated approach and chooses to use globally-unique GUID identifiers.
+{% endhint %}
 
 ## Entities
 
