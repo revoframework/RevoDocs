@@ -5,12 +5,12 @@
 ## General
 
 * [Overview](general/overview/README.md)
-  * [Features](general/overview/features.md)
-  * [Super-short example](general/overview/super-short-example.md)
   * [Design overview](general/overview/design-overview.md)
   * [Project structure](general/overview/project-structure.md)
-* [Getting started](general/getting-started/README.md)
-  * [Example: Simple TO-DOs \(task list app\)](general/getting-started/example-simple-to-dos-task-list-app.md)
+* [Features](general/features.md)
+* [Super-short example](general/super-short-example.md)
+* [Getting started](general/getting-started.md)
+* [Example: Simple TO-DOs \(task list app\)](general/example-simple-to-dos-task-list-app.md)
 * [Release notes](general/release-notes.md)
 * [FAQ](general/faq.md)
 

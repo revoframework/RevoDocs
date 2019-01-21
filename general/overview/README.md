@@ -2,8 +2,8 @@
 
 Revo is an application framework for modern C\#/.NET applications built with _event sourcing_, _CQRS_ and _DDD_.
 
-* [**Features**](features.md)\*\*\*\*
-* \*\*\*\*[**Super-short example**](super-short-example.md)\*\*\*\*
+* [**Features**](../features.md)\*\*\*\*
+* \*\*\*\*[**Super-short example**](../super-short-example.md)\*\*\*\*
 * \*\*\*\*[**Design overview**](design-overview.md)
 * [Project structure](project-structure.md)
 
