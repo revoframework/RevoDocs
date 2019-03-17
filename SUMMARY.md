@@ -16,7 +16,7 @@
 
 ## Reference guide
 
-* [Configuration](reference-guide/configuration.md)
+* [Configuration and boostrapping](reference-guide/configuration.md)
 * [Dependency injection](reference-guide/dependency-injection.md)
 * [Domain building blocks](reference-guide/domain-building-blocks.md)
 * [Commands and queries](reference-guide/commands-and-queries.md)
@@ -28,7 +28,7 @@
 * [Validation](reference-guide/validation.md)
 * [Sagas](reference-guide/sagas.md)
 * [Jobs](reference-guide/jobs.md)
-* [Integrations](reference-guide/integrations.md)
+* [Messaging and integrations](reference-guide/integrations.md)
 * [Multi-tenancy](reference-guide/multi-tenancy.md)
 * [Testing](reference-guide/testing.md)
 

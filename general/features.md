@@ -25,8 +25,8 @@ Segregating command and query responsibilities with:
 [**Projections**](../reference-guide/projections.md)  
 ****Support for read-model projections with various backends ****\(e.g. _MSSQL_/_Entity Framework 6_, _RavenDB_...\), automatic idempotency- and concurrency-handling, etc.
 
-[**SOA and integration**](../reference-guide/integrations.md)  
-****Scale and integrate by publishing and receiving events, commands and queries using common messaging patterns, e.g. with _RabbitMQ_ message queue and/or uses _Rebus_ service bus.
+[**SOA, messaging and integration**](../reference-guide/integrations.md)  
+****Scale and integrate by [publishing and receiving events](../reference-guide/integrations.md#rabbitmq-messaging-with-easynetq), commands and queries using common messaging patterns, e.g. with _RabbitMQ_ message queue \(using _EasyNetQ_ connector or _Rebus_ service bus\).
 
 [**Sagas**](../reference-guide/sagas.md)  
 ****Coordinating long-running processes or inter-aggregate cooperation with sagas that react to events \(a.k.a. _process managers_\).

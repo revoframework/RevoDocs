@@ -5,7 +5,7 @@ description: >-
   behavior in a number of ways.
 ---
 
-# Configuration
+# Configuration and boostrapping
 
 ## Configuration
 
@@ -14,6 +14,44 @@ Apart from the usual possibility to specify many run-time parameters in a dynami
 ## Examples
 
 Typically, the configuration object would be created at an application entry point and then configured as neccessary using fluent-style extension methods.
+
+### ASP.NET Core
+
+To easily bootstrap a Revo in an ASP.NET core application, simply inherit your `Startup` class from the `RevoStartup` base class and override the `CreateRevoConfiguration` method.
+
+Example:
+
+```csharp
+public class Startup : RevoStartup
+{
+    public Startup(IConfiguration configuration) : base(configuration)
+    {
+    }
+
+    public override void ConfigureServices(IServiceCollection services)
+    {
+        base.ConfigureServices(services);
+        // TODO configure your services
+    }
+
+    public override void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+    {
+        base.Configure(app, env, loggerFactory);
+        // TODO configure your ASP.NET core app, e.g.:
+        app.UseMvcWithDefaultRoute();
+    }
+
+    protected override IRevoConfiguration CreateRevoConfiguration()
+    {
+        string connectionString = Configuration.GetConnectionString("TodosPostgreSQL");
+
+        return new RevoConfiguration()
+            .UseAspNetCore()
+            .UseEFCoreDataAccess(contextBuilder => contextBuilder.UseNpgsql(connectionString))
+            .UseAllEFCoreInfrastructure();
+    }
+}
+```
 
 ### ASP.NET
 
