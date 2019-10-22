@@ -1,14 +1,14 @@
 # Domain building blocks
 
-The domain model is one of the integral parts of applications practicing domain-driven design where most of their business logic resides. Because the implementation of the DDD is not a trivial task, the framework includes a number of basic building blocks for the model implementation.
+The domain model is one of the integral parts of applications practicing domain-driven design and also the place where most of their business logic resides. Because the implementation of the DDD is not a trivial task, the framework includes a number of basic building blocks for the model implementation.
 
 {% hint style="info" %}
-In most of the cases where working with identities, Revo framework takes an opinionated approach and chooses to use globally-unique GUID identifiers.
+In most of the cases where working with entity identifiers, Revo framework takes an opinionated approach and chooses to use globally-unique GUIDs.
 {% endhint %}
 
 ## Entities
 
-An entity can be any object that has a \(be it local or global\) ID and is implemented using IEntity interface. There are two predefined base classes for entities – `BasicEntity` and `EventSourcedEntity` \(see below for more information\). They always should be a member of an aggregate.
+An entity can be any object that has a \(be it local or global\) ID and is implemented using IEntity interface. There are two predefined base classes for entities – `BasicEntity` and `EventSourcedEntity` \(see below for more information\). Entities are always a member of an aggregate.
 
 ## Aggregates
 
@@ -16,13 +16,13 @@ Aggregates are one of the most important concepts in DDD defining the consistenc
 
 ### Basic aggregates and entities
 
-`BasicAggregateRoot` and `BasicEntity` define base classes for aggregate roots and entities which would usually be persisted using their visible state \(like their public properties - i.e. when mapping to a RDBMS using an ORM\). These are also annotated as database entities \(`DatabaseEntityAttribute`\) which means their model definition will automatically be picked up by ORMs like Entity Framework \(see 5.5.6\) and they implement `IQueryableEntity` which means it will be possible to query them using IQueryables with repositories \(see 5.5 for more information on repositories\). By default, they will be automatically row-versioned to implement optimistic concurrency when saving them to a database \(increasing their version number with each save\).
+`BasicAggregateRoot` and `BasicEntity` define base classes for aggregate roots and entities which would usually be persisted using their visible state \(like their public properties - i.e. when mapping to a RDBMS using an ORM\). These base classes are also annotated as database entities \(`DatabaseEntityAttribute`\) which means their model definition will automatically be picked up by ORMs like Entity Framework \(see [Data persistence](data-persistence.md)\) and they implement `IQueryableEntity` which means it will be possible to query them as `IQueryable` with repositories. By default, they will be automatically row-versioned to implement optimistic concurrency when saving them to a database \(increasing their version number with each save\).
 
-For compatibility with ORMs like Entity Framework, these basic entities will usually need to define a parameterless constructor \(which can be protected and should not limit the options to expose another public constructor taking parameters and ensuring entity invariants\).
+For compatibility with ORMs like Entity Framework, these basic entities will usually need to define a parameterless constructor \(which may be `protected` ; this means it should not limit your from exposing another proper public constructor taking parameters and ensuring entity invariants\).
 
 ### Event sourced aggregates
 
-Event sourced aggregates implemented using `EventSourcedAggregateRoot` and `EventSourcedEntity` will use events to modify their state. Unlike the basic entities, they should only modify their state upon receiving a new event. Aggregates can internally publish new events using the `Publish<TEvent>` method. This pushes the event to the internal queue of uncommitted events that will get persisted once the repository is saved and invokes an event handler for the specific event type that actually produces the effect of modifying the internal state of the aggregate \(e.g. changes the values of its fields\). The same event handlers get also invoked when the aggregate gets loaded from a repository.
+Event sourced aggregates implemented using `EventSourcedAggregateRoot` and `EventSourcedEntity` will use events to progress their state. Unlike the basic entities, they should only modify their state upon emitting a new event. Aggregates can internally publish new events using the `Publish<TEvent>` method. This pushes the event to the internal queue of uncommitted events that will get persisted once the repository is saved and invokes an event handler for the specific event type that actually produces the effect of modifying the internal state of the aggregate \(e.g. changes the values of its fields\). The same event handlers get also invoked when the aggregate gets loaded from a repository.
 
 {% hint style="info" %}
 When loading an event-sourced aggregate, the repository first creates a blank instance of the aggregate and then replays all the events that the aggregate published previously – effectively reconstructing its complete state. It is obvious that it is vital for event-sourced aggregates to only use event for progressing their state as change made in any other way will get lost upon the next loading.
