@@ -1,25 +1,35 @@
 ---
 description: >-
-  Events are one of the basic ways of communication used in Revo. The framework
-  offers various ways for implementing an event-driven architecture.
+  Events are one of the most powerful ways of communication used in Revo. The
+  framework offers a few different ways for implementing an event-driven
+  architecture.
 ---
 
 # Events
 
 ## Quick start
 
+There is a number of reasons you'd want to publish events, e.g.:
+
+* progress the state of an [event sourced aggregate](domain-building-blocks.md#event-sourced-aggregates),
+* [project read model](projections.md#entity-event-projections) from these events for such aggregates,
+* use it as a mean for inter-aggregate communication \(event-driven architecture in DDD\),
+* communicate across system boundaries \([integrations](integrations.md#rabbitmq-messaging-with-easynetq)\).
+
 This part shows how to define an event, implement an event listener, register it and publish an event in the simplest manner. Further elaboration on how the system works is provided in later chapters.
 
-Please note that this is primarily intended for more advanced usage scenarios or learning the framework architecture and that you generally don't need to write own listeners when you want to use projections and that you don't need to manually publish events if you publish them from your aggregates.
+{% hint style="info" %}
+Please note that this is primarily intended for more advanced usage scenarios or learning the framework architecture. You generally don't need to write your own listeners when you just want to use projections.
+{% endhint %}
 
 ### Define an event
 
 ```csharp
-public class ShoppingCartItemAddedEvent : IEvent
+public class ShoppingCartItemAddedEvent : DomainAggregateEvent
 {
 	public ShoppingCartItemAddedEvent(Guid customerId, Guid itemId, int amount)
 	{
-	    CustomerId = customerId;
+	  CustomerId = customerId;
 		ItemId = itemId;
 		Amount = amount;
 	}
@@ -82,7 +92,7 @@ public class ShoppingCartEventListener :
 }
 ```
 
-* **I don't care about these or don't want the overhead of async events** \(typically only a few usage scenarios, see following chapters for details\). → Implement a regular event listener:
+* **I don't care about delivery guarantees or don't want the overhead of async events** \(typically only a few usage scenarios, see following chapters for details\). → Implement a regular event listener:
 
 ```csharp
 public class ShoppingCartEventHandler
@@ -124,6 +134,30 @@ public class MyModule : NinjectModule
 ```
 
 ### Publish the event
+
+Either,
+
+* **Publish an event from an aggregate, in a transactional manner \(alongside saving the aggregate changes to database\):**
+
+```csharp
+[DomainClassId("F23D8F21-D2A4-4B47-BC64-8D01795A3471")]
+public class ShoppingCart : EventSourcedAggregateRoot
+{
+    /** CODE OMITTED FOR BREVITY **/
+
+    public void AddItem(ShopItem item, int amount)
+    {
+        /** omitted some business logic here... **/
+        
+        Publish(new ShoppingCartItemAddedEvent(item.Id,
+          this.CustomerId, amount));
+    }
+
+    /** ... **/
+}
+```
+
+* **Publish an event from anywhere else, e.g. straight from a command handler or from an external source:**
 
 ```csharp
 IEventBus eventBus = ...;
@@ -172,7 +206,7 @@ public class ShoppingCartItemAddedEvent : IEvent
 {
 	public ShoppingCartItemAddedEvent(Guid customerId, Guid itemId, int amount)
 	{
-	    CustomerId = customerId;
+		CustomerId = customerId;
 		ItemId = itemId;
 		Amount = amount;
 	}
@@ -183,11 +217,7 @@ public class ShoppingCartItemAddedEvent : IEvent
 }
 ```
 
-```csharp
-
-```
-
-As can be seen in the previous code listing, it is considered a good practice to make the event classes immutable in order to ensure their data never changes once they are created.
+As you can see in the previous code listing, it is considered a good practice to make the event classes immutable in order to ensure their data never changes once they are created.
 
 ### Event messages and metadata
 
@@ -225,11 +255,12 @@ public interface IEventBus
 
 ### Event versioning
 
-The framework implements a versioning support for events. Business domain requirements often change and so do have to the events and their definitions. Because the events in the event store cannot in general be ex-post modified and renaming event class every time there is a slight change in its definition would be cumbersome, it is possible to define multiple versions of the same event class. The type information when saving an event into an event store consists of event type name + event type version, so the system is able to correctly lookup the corresponding CLR type.
+The framework implements a versioning system for events. There are situations when a need for changing the definition of an event arises - business domain requirements change over time, bugs get fixed and you may sometimes end up needing to change the definition of your domain classes and their events. Because the events in the event store in general cannot be modified once saved, it is possible to define multiple versions of the same event class. The type information when saving an event into an event store consists of event type name + event type version, so the system is able to correctly lookup the corresponding CLR type.
 
-By default, any event class will be considered to be of version 1. When introducing a new version of the event, the developer simply duplicates the old event class and suffixes its name with “V” + the number of its version. After that, the original event class updated with the new event definition is annotated with an `EventVersionAttribute` specifying its new version \(which makes it possible to preserve its original name\). An example follows.
+By default, any event class will be considered to be of version 1. When introducing a new version of the event, you can simply create a copy of the old event class and suffix its name with “V” + the number of its version. After that, the original event class updated with the new event definition is to be annotated with an `EventVersionAttribute` specifying its new version \(which makes it possible to preserve its original name\). An example:
 
 ```csharp
+// Your new event class
 [EventVersion(2)]
 public class PageBookmarkedEvent : IEvent
 {
@@ -245,6 +276,7 @@ public class PageBookmarkedEvent : IEvent
 ```
 
 ```csharp
+// Your original event class
 public class PageBookmarkedEventV1 : IEvent
 {
 	public PageBookmarkedEvent(string pageUrl)
@@ -256,7 +288,58 @@ public class PageBookmarkedEventV1 : IEvent
 }
 ```
 
-Note that this does not replace the old instances of the event \(not yet - like automatically upgrading them to the newer version\), so it is necessary to keep the event handlers for both of the versions of the event.
+Note that this does not replace the old instances of the event \(like automatically upgrading them to the newer version\), so you either need to keep the event handlers for both of the versions of the event \(less practical approach\) or implement appropriate [event upgrades](events.md#event-upgrades).
+
+### Event upgrades
+
+Once your application matures and you define more [historical versions](events.md#event-versioning) of your events, it would become cumbersome to maintain handlers \(ApplyEvent methods in event-sourced aggregates...\) for all the previous and current versions at once. To mitigate this, framework offers automatic event upgrades based on the event transformations you define.
+
+Event upgrades are applied any time an event-sourced aggregate is loaded from an event store and the aggregate is then loaded with the new, upgraded events. All you have to do to implement an event upgrade is to define a class deriving from `IEventUpgrade` \(Revo auto-discovers these upon startup\).
+
+{% hint style="info" %}
+For most cases, it is recommended to use the generic `EventUpgrade<TAggregate>` class as a base class for your upgrades, which also check the aggregate class before trying to apply any upgrades \(which is more efficient if the event is used by only one aggregate class\).
+{% endhint %}
+
+```csharp
+public class BookmarkCollectionEventUpgrade : EventUpgrade<BookmarkCollection>
+{
+    protected override IEnumerable<IEventMessage<DomainAggregateEvent>> DoUpgradeStream(IEnumerable<IEventMessage<DomainAggregateEvent>> events)
+    {
+        foreach (var message in events)
+        {
+            if (message.Event is PageBookmarkedEventV1 pageBookmarkedEventV1)
+            {
+                yield return message.Upgrade(new PageBookmarkedEvent(message.Event.PageUrl, "Root"));
+            }
+            else
+            {
+                yield return message;
+            }
+        }
+    }
+}
+```
+
+An event upgrade takes a stream \(`IEnumerable`\) of all original aggregate's event messages and then returns an upgraded stream of event messages. You can easily implement this transformation using C\# `yield return` operator.
+
+{% hint style="success" %}
+As you can see in the previous code The framework implements a helper function `EventMessageUpgradeExtensions.Upgrade<TSource>` for upgrading the event message, which returns a new event message with the domain event replaced while keeping all original message metadata.
+{% endhint %}
+
+For code brevity, there are also a few helper methods in `EventMessageUpgradeExtensions` class making the transformation even easier, e.g.:
+
+```csharp
+return events
+    .Replace<PageBookmarkedEventV1>(message => new DomainAggregateEvent[]
+    {
+        new PageBookmarkedEvent(message.Event.PageUrl, "Root")
+    })
+    .Remove<SomeOldCompletelyRedundantEvent>();
+```
+
+{% hint style="warning" %}
+ At this moment, event upgrades do not work for your arbitrary event listeners that you have defined and are used **only for event-sourced aggregate loading**. This means that if you get an event from an external out-dated system or you have any unprocessed queued events of an outdated version, these events won't be automatically upgraded and you have to implement their support manually.
+{% endhint %}
 
 ## Synchronous event processing
 

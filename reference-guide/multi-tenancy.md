@@ -8,7 +8,7 @@ With the rising popularity of cloud software deployment and the software-as-a-se
 
 ### Context resolver
 
-The framework defines an `ITenantContextResolver` which is responsible for resolving the tenant that is active for the scope of an active request. By default, the framework uses `NullTenantContextResolver` which always resolves to a null tenant – for requests that have a null tenant, no multi-tenancy features will active. It is also possible that certain parts of the application will have null tenant \(e.g. the login pages\) and some will actually resolve to a specific tenant \(i.e. the rest of the application\). The framework defines one more tenant context resolver – `SingleTenantContextResolver` which always resolver to a specific \(constant-value\) tenant. This is especially helpful during development \(rather than in a production environment\). End applications are free to implement and rebind to their own implementations of tenant context resolver – very commonly resolving by the HTTP request subdomain or other request-dependent properties. The resolvers return objects of the `ITenant` interface which simply contain just an ID and a name property and can be implemented in any way they need.
+The framework defines an `ITenantContextResolver` which is responsible for resolving the tenant that is active for the scope of an active request. By default, the framework uses `NullTenantContextResolver` which always resolves to a null tenant. It is also possible that certain parts of the application will have null tenant \(e.g. the login pages\) and some will actually resolve to a specific tenant \(i.e. the rest of the application\). The framework defines one more tenant context resolver – `SingleTenantContextResolver` which always resolver to a specific \(constant-value\) tenant. This is especially helpful during development \(rather than in a production environment\). Production-envionment applications are free to implement and register their own implementations of tenant context resolver – very commonly resolving by the HTTP request subdomain, request authorization or any other request-dependent properties. The resolvers return objects of the `ITenant` interface which simply contain just an ID and a name property and can be implemented in any way they need.
 
 ```csharp
 public interface ITenantContextResolver
@@ -37,5 +37,21 @@ public interface ITenantOwned
 }
 ```
 
-For the non-null tenant contexts, the repository allows working with any records that belong to that specific tenant and records that have null tenant specified \(and throws an exception if the repository tries to modify records it should not\). For null tenant, the repository work fully unrestricted. This enables an automatic workflow when working with any tenant-owned entities that prevents the risk of leaking unauthorized access to records of other tenants.
+Within any tenant context, the repository allows working with any records that belong to that specific tenant and records that have null tenant specified \(and throws an exception if the repository tries to modify records it should not\). By default, null tenant context has only access to records having null tenant ID. This enables an automatic workflow when working with any tenant-owned entities that prevents the risk of leaking unauthorized access to records of other tenants.
+
+## Configuration
+
+Multi-tenancy features can be configured when setting-up Revo application, e.g. in you Startup class:
+
+```csharp
+return new RevoConfiguration()
+    ...
+    .ConfigureInfrastructure(
+      cfg =>
+      {
+        cfg.Tenancy.UseNullTenantContextResolver = false;// now you can bind your own tenant context resolver
+        cfg.Tenancy.EnableTenantRepositoryFilter = true; // by default
+        // more...
+      });
+```
 

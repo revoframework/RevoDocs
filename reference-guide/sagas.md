@@ -5,7 +5,7 @@
 Sagas implement a way of coordination of long-running processes and collaboration between eventually consistent aggregates. To do that, they listen for published domain events and send out new commands.
 
 {% hint style="info" %}
-Sagas in Revo framework are implemented as stateful process managers similarly to some other frameworks. These concepts and the terminology is further discussed in chapter 3.9.1.
+Sagas in Revo framework are implemented as stateful process managers similarly to some other frameworks.
 {% endhint %}
 
 ## Basic usage with saga keys

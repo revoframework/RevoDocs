@@ -1,6 +1,10 @@
-# Commands and queries
+---
+description: >-
+  The framework implements a number of facilities for working with commands,
+  queries and for implementing CQRS.
+---
 
-The framework implements a number of facilities for working with commands, queries and for implementing CQRS.
+# Commands and queries
 
 ## Commands, queries
 

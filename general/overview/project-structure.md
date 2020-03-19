@@ -23,7 +23,6 @@ The framework codebase is split into a number of submodules, making it possible 
     Change-tracking and entity history features.
 
   * **Revo.Extensions.Notifications** An extensive and customizable framework for user notifications \(including mail notifications, push notifications, etc.\).
-  * **Revo.Extensions.AspNet.Interop**
 * **Tests**
 * **Examples**
 

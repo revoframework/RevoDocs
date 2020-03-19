@@ -2,15 +2,19 @@
 
 ## Overview
 
-In Revo, a typical processing of a request consists of several distinct phases. A general overview of the data flows during a request can be seen in picture below.
+In Revo, a typical processing of a request consists of several distinct phases. A simplified overview of the data flows during a request can be seen in picture below.
+
+{% hint style="danger" %}
+This section is outdated and needs rewriting.
+{% endhint %}
 
 ![Data flows during a request](../.gitbook/assets/revo_request_processing_data_flows-3.png)
 
 ## Command handlers
 
-A processing of a request can be initiated in different ways – most often by an HTTP request received by a controller of a server API \(e.g. implemented with ASP.NET WebAPI\) or by a message received from an external service via an integration layer \(e.g. Rebus messaging via RabbitMQ\). Such request would usually trigger the processing of a command or a query. In case of a REST API request, the controller would construct a command or query based on data received from the client and send it to the _command bus_. Command bus finds a handler responsible for the command or query type. Note that if an integration layer like Rebus is configured \(see chapter 7.9\), it is also possible that the command bus will directly hand over the processing of this command/query to an external service like depicted by the diagram.
+A processing of a request can be initiated in different ways – most often by an HTTP request received by a controller of a server API \(e.g. implemented with ASP.NET WebAPI\) or by a message received from an external service via an integration layer \(e.g. Rebus messaging via RabbitMQ\). Such request would usually trigger the processing of a command or a query. In case of a REST API request, the controller would construct a command or query based on data received from the client and send it to the _command bus_. Command bus finds a handler responsible for the command or query type. Note that if an integration layer like Rebus is configured, it is also possible that the command bus will directly hand over the processing of this command/query to an external service like depicted by the diagram.
 
-When a local handler is about to get invoked, the command/query goes through the configured processing pipeline as described in chapter 7.4.2. By default, this includes the use of a number of command filters implementing various cross-cutting concerns like authorization \(see chapter 7.11.2\) and validation \(chapter 7.12\). Very importantly, it also includes the automatic management of the _unit of work_.
+When a local handler is about to get invoked, the command/query goes through the configured processing pipeline as described in chapter. By default, this includes the use of a number of command filters implementing various cross-cutting concerns like authorization and validation. Very importantly, it also includes the automatic management of the _unit of work_.
 
 ## Unit of work
 

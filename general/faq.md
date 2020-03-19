@@ -2,7 +2,7 @@
 
 ## Who maintains this project?
 
-This project is primarily maintained by [ASP a.s.](http://aspas.eu/) company and then by [Martin Zima](https://zimamartin.cz/), who develops the framework in his own spare time. The framework is currently used in the products developed by the company and several other smaller projects. Any help or pull requests are always welcome!
+This project is primarily maintained by [Olify IO s.r.o.](https://olify.io/) company and [Martin Zima](https://zimamartin.cz/). The framework is currently used in several commercial products by the company and by a few other projects. Any help or pull requests are always welcome!
 
 ## How is the framework licensed?  Can I use it my commercially?
 

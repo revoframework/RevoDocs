@@ -26,7 +26,16 @@ There is an out-of-the-box support for `ExecuteCommandJob` which simply executes
 
 ## Hangfire
 
-For a reliable execution of jobs, the framework currently uses the [Hangfire ](https://www.hangfire.io/)library to back its implementation. Hangfire also takes care of job failure management \(restarting the jobs when they fail, if configured to do so\), offers a web administration console and handles back-ground execution in ASP.NET applications well \(so their application pools are not recycled prematurely\).
+For a reliable execution of jobs, the framework can use the [Hangfire ](https://www.hangfire.io/)library. Hangfire also takes care of job failure management \(restarting the jobs when they fail, if configured to do so\), offers a web administration console and handles back-ground execution in ASP.NET \(Core\) applications well \(so their application pools are not recycled prematurely\).
+
+To use Hangfire, add reference to **Revo.Hangfire** package and configure it when setting up your Revo application \(e.g. in your Startup class\) as follows:
+
+```csharp
+return new RevoConfiguration()
+    ...
+    //or use any other Hangfire storage provider
+    .UseHangfire(() => new PostgreSqlStorage(dbConnectionString));
+```
 
 
 

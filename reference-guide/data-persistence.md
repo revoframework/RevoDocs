@@ -64,15 +64,15 @@ Similar to the CRUD aggregate store, the event sourced aggregate store is not im
 
 CRUD data repositories \(implementations of `ICrudRepository` which is contained in Revo.DataAccess module\) represent a way of a more direct way of accessing database. Unlike the aggregate repository \(`IRepository`\), it is not burdened with domain concepts like aggregate consistency boundaries and encapsulation and provides more flexibility when working with data. Where IRepository offered only basic functionality for working with entities to abstract from the underlying technology, `ICrudRepository` strives to do the opposite and offer maximum of the features that the used database \(or an ORM\) has while still maintaining some minimum level of abstraction in order to enable easy testing. Having said that, it is important to emphasize that they serve a completely different purpose – while the aggregate IRepository would usually be used on the write side of the application in command handlers to update the domain, the CRUD repository will mostly be used just for efficient access to read models in projectors and query handlers and in other places that are not encumbered by the complex business rules handled by the domain model. 
 
-{% hint style="danger" %}
-Under no circumstances it should be used to modify domain model data bypassing its business rules. However, in some scenarios, when it is unnecessary to maintain different write model and read model in the database it might be possible to reuse the domain model for queries \(this is supported by the EF6 implementation, see chapter 5.5\).
+{% hint style="warning" %}
+Under no circumstances it should be used to modify domain model data bypassing its business rules. However, in some scenarios, when it is unnecessary to maintain different write model and read model in the database it might be possible to reuse the domain model for queries.
 {% endhint %}
 
 The `ICrudRepository` interfaces relies heavily on the use of `IQueryable<T>` support of the .NET platform. This enables to perform arbitrary queries on the database without bloating the interface definition with a huge number of different query methods or a need for custom repositories for every specific, saving a lot of developer’s time, while still also providing type safety and the safety of compile-time checks to a certain degree.
 
 Most of the read-related functionality of `ICrudRepository` is actually defined in a base type named `IReadRepository`. This base type does not allow any modifications to the entities \(i.e. it has no save or add/remove methods\), which means it is very suitable in situations when we want to limit the operations an object can do with entities in the repository – for example in a query handler that should always only performs reads of the database. It also potentially makes testing those entities easier.
 
-Most of the CRUD repository implementations will also define its own repository interfaces derived from `ICrudRepository` in order to facilitate the use of the features specific to its technology \(for example, `IEF6CrudRepository` making it possible to directly work with some of the Entity Framework ORM features\).
+Most of the CRUD repository implementations will also define its own repository interfaces derived from `ICrudRepository` in order to facilitate the use of the features specific to its technology \(for example, `IEFCoreCrudRepository` making it possible to directly work with some of the EF Core ORM features\).
 
 Both types of repositories also offer an in-memory implementation of their interfaces that are suitable for testing purposes. For more information about this, see chapter 7.15.
 

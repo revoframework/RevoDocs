@@ -11,7 +11,6 @@
 * [Super-short example](general/super-short-example.md)
 * [Getting started](general/getting-started.md)
 * [Example: Simple TO-DOs \(task list app\)](general/example-simple-to-dos-task-list-app.md)
-* [Release notes](general/release-notes.md)
 * [FAQ](general/faq.md)
 
 ## Reference guide
@@ -21,11 +20,12 @@
 * [Domain building blocks](reference-guide/domain-building-blocks.md)
 * [Commands and queries](reference-guide/commands-and-queries.md)
 * [Events](reference-guide/events.md)
-* [Request life-cycle](reference-guide/request-life-cycle.md)
 * [Data persistence](reference-guide/data-persistence.md)
+* [Database migrations](reference-guide/database-migrations.md)
 * [Projections](reference-guide/projections.md)
 * [Authorization](reference-guide/authorization.md)
 * [Validation](reference-guide/validation.md)
+* [Request life-cycle](reference-guide/request-life-cycle.md)
 * [Sagas](reference-guide/sagas.md)
 * [Jobs](reference-guide/jobs.md)
 * [Messaging and integrations](reference-guide/integrations.md)

@@ -16,9 +16,15 @@ Aggregates are one of the most important concepts in DDD defining the consistenc
 
 ### Basic aggregates and entities
 
-`BasicAggregateRoot` and `BasicEntity` define base classes for aggregate roots and entities which would usually be persisted using their visible state \(like their public properties - i.e. when mapping to a RDBMS using an ORM\). These base classes are also annotated as database entities \(`DatabaseEntityAttribute`\) which means their model definition will automatically be picked up by ORMs like Entity Framework \(see [Data persistence](data-persistence.md)\) and they implement `IQueryableEntity` which means it will be possible to query them as `IQueryable` with repositories. By default, they will be automatically row-versioned to implement optimistic concurrency when saving them to a database \(increasing their version number with each save\).
+`BasicAggregateRoot` and `BasicEntity` define base classes for aggregate roots and entities which will be persisted using their visible state \(typically perstisting their public properties\) to an RDBMS using an ORM or to a document-oriented database. Alone deriving from these base classes will be enough to be picked-up be Revo's selected persistence implentation \(e.g. EF Core\).
 
-For compatibility with ORMs like Entity Framework, these basic entities will usually need to define a parameterless constructor \(which may be `protected` ; this means it should not limit your from exposing another proper public constructor taking parameters and ensuring entity invariants\).
+{% hint style="info" %}
+Any class annotated with`DatabaseEntityAttribute` \(just like these basic aggregate base classes\) will be automatically be mapped to database using their public state \(e.g. using EF Core if you are using Revo.EFCore as your primary data repository\). For more see [Data persistence](data-persistence.md).
+{% endhint %}
+
+These base classes also implement `IQueryableEntity` which means it will be possible to query them as `IQueryable` with repositories. By default, they will be automatically row-versioned to implement optimistic concurrency when saving them to a database \(increasing their version number with each save\).
+
+For compatibility with ORMs like EF Core, these basic entities will usually need to define a parameterless constructor \(which may be `protected` ; this means it should not limit your from exposing another proper public constructor taking parameters and ensuring entity invariants\).
 
 ### Event sourced aggregates
 
@@ -44,16 +50,19 @@ These methods need to be either private, protected or internal \(non-public in g
 
 ### Example
 
-Here is a contrived example of a simple aggregate publishing and handling an event:
+Here is a contrived example of a simple event sourced aggregate publishing and handling events:
 
+{% tabs %}
+{% tab title="Ticket.cs" %}
 ```csharp
 [DomainClassId("061ABAC8-7BE0-46D6-A6DB-BA8593027EC9")]
 public class Ticket : EventSourcedAggregateRoot
 {
-    public Ticket(Guid id, string subject, User assignedUser)
+    public Ticket(Guid id, string subject)
         : base(id)
     {
-        ApplyEvent(new TicketCreatedEvent(name, assignedUser?.Id));
+        Publish(new TicketStateChangedEvent(TicketState.Open));
+        Rename(subject);
     }
 
     protected Ticket(Guid id) : base(id)
@@ -61,8 +70,15 @@ public class Ticket : EventSourcedAggregateRoot
     }
 
     public string Subject { get; private set; }
-    public Guid? AssignedUser { get; private set; }
     public TicketState State { get; private set; }
+
+    public void Rename(string subject)
+    {
+       if (Subject != subject)
+       {
+           Publish(new TicketRenamedEvent(subject));
+       }
+    }
 
     public void Resolve()
     {
@@ -72,22 +88,59 @@ public class Ticket : EventSourcedAggregateRoot
                 $"{this} has already been resolved");
         }
 
-        ApplyEvent(new TicketResolvedEvent());
+        Publish(new TicketStateChangedEvent(TicketState.Resolved));
     }
 
-    private void Apply(TicketCreatedEvent ev)
+    private void Apply(TicketRenamedEvent ev)
     {
         Subject = ev.Subject;
-        AssignedUser = ev.AssignedUser;
-        State = TicketState.Pending;
     }
     
-    private void Apply(TicketResolvedEvent ev)
-    
-        State = TicketState.Resolved;
+    private void Apply(TicketStateChangedEvent ev)
+    {
+        State = ev.State;
     }
 }
 ```
+{% endtab %}
+
+{% tab title="TicketState.cs" %}
+```csharp
+public enum TicketState
+{
+    Open, Resolved
+}
+```
+{% endtab %}
+
+{% tab title="TicketStateChangedEvent.cs" %}
+```csharp
+public class TicketStateChangedEvent : DomainAggregateEvent
+{
+	public TicketStateChangedEvent(TicketState state)
+	{
+		State = state;
+	}
+
+	public TicketState State { get; }
+}
+```
+{% endtab %}
+
+{% tab title="TicketRenamedEvent.cs" %}
+```csharp
+public class TicketRenamedEvent : DomainAggregateEvent
+{
+	public TicketRenamedEvent(string subject)
+	{
+		Subject = subject;
+	}
+	
+	public string Subject { get; }
+}
+```
+{% endtab %}
+{% endtabs %}
 
 ### Event routing inside an aggregate
 
@@ -97,7 +150,21 @@ As already mentioned, it is also possible to compose the aggregate roots and ent
 
 ## Domain events
 
-A basic insight on how to implement domain events in aggregates was provided by chapters [Event sourced aggregates](domain-building-blocks.md#event-sourced-aggregates) and [Event routing inside an aggregate](domain-building-blocks.md#event-routing-inside-an-aggregate). For more info on events and their processing, see the following chapter [Events](events.md).
+A basic insight on how to implement domain events in aggregates was provided in previous parts named [Event sourced aggregates](domain-building-blocks.md#event-sourced-aggregates) and [Event routing inside an aggregate](domain-building-blocks.md#event-routing-inside-an-aggregate).
+
+Although events are mostly discussed in connection to event-sourced aggregates, the framework has a notable feature which allows you to publish even in [basic aggregates](domain-building-blocks.md#basic-aggregates-and-entities) while still providing the same transactional delivery guarantees \(when saving a basic aggregate to an RDBMS, both the aggregate and the events published by it get saved inside one transaction and the events get processed only after successfully persisting them\).
+
+{% hint style="success" %}
+For more info on events and their processing, see chapter [Events](events.md).
+{% endhint %}
+
+This means you can use events as a powerful means of inter-aggregate communication \(or even cross-system communication\) or to simply implement an event-driven driven architecture \(e.g. you can asynchronously trigger actions using an event listener anytime a modified aggregate publishes an event\).
+
+You can publish events from inside an aggregate using its protected `Publish` method:
+
+```csharp
+protected virtual void Publish(T evt) where T : DomainAggregateEvent
+```
 
 ## Value objects
 
