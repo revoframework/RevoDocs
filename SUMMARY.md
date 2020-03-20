@@ -10,7 +10,7 @@
 * [Features](general/features.md)
 * [Super-short example](general/super-short-example.md)
 * [Getting started](general/getting-started.md)
-* [Example: Simple TO-DOs \(task list app\)](general/example-simple-to-dos-task-list-app.md)
+* [Example: Task list app](general/example-simple-to-dos-task-list-app.md)
 * [FAQ](general/faq.md)
 
 ## Reference guide
