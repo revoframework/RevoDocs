@@ -79,6 +79,10 @@ public interface IQueryHandler<TQuery, TResult>
 }
 ```
 
+{% hint style="info" %}
+By default, all command and query handlers get auto-discovered in all referenced assemblies and registered in [task scope](dependency-injection.md#intaskscope).
+{% endhint %}
+
 ## Command bus
 
 To send a command or query to the system, one can use an `ICommandBus` which encapsulates most of the command processing details.
