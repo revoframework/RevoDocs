@@ -6,6 +6,10 @@ description: So how does it actually look when writing an application with Revo?
 
 These few following paragraphs show how could one design super-simple application that can save tasks using event-sourced aggregates and then query them back from a RDBMS.
 
+{% hint style="info" %}
+A little-bit more complete application based on this code, along with some walkthrough, can be found in the [Task list app example](example-simple-to-dos-task-list-app.md).
+{% endhint %}
+
 ## Event
 
 The event that happens when changing a task's name.
