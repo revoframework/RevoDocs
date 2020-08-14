@@ -4,3 +4,7 @@ Revo is a simple application framework for modern C\#/.NET applications built wi
 
 This guide explains what this framework is, explains some of its fundamentals needed to get started with it and also serves as a basic reference guide. You can start by reading the [Overview](general/overview/) or by exploring an example application in [Getting started](general/getting-started.md).
 
+{% hint style="info" %}
+Revo framework development is supported by company [**Olify IO s.r.o.**](https://olify.io/)\*\*\*\*
+{% endhint %}
+
