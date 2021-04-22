@@ -9,7 +9,7 @@ Revo is an application framework for modern C\#/.NET applications built with _ev
 
 ## Requirements
 
-The framework is written in C\# 7.1 and primarily targets .NET Core 3.1+/.NET Standard 2.0\).
+The framework is written in the latest version of C\# and primarily targets .NET Core 3.1+/.NET Standard 2.0.
 
-Revo also makes a heavy use of the C\# async/await pattern and uses the TAP \(Task Asynchronous Pattern\) throughout its entire codebase \(i.e. _async all the way_ approach\).
+Revo makes a heavy use of the C\# async/await pattern and uses the TAP \(Task Asynchronous Pattern\) throughout its entire codebase \(i.e. _async all the way_ approach\).
 

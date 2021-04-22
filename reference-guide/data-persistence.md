@@ -6,15 +6,15 @@ Revo framework offers a number of facilities for working with entities and their
 
 ### Aggregate repository
 
-In terms of domain-driven design, `IRepository` \(defined in Revo.Infrastructure module\) is the high-level repository that would be used as a part of the domain for the write side of the application working with the domain model. The implementation of `IRepository` interface is not bound to any specific database system backend \(or an ORM library\) and instead delegates most of the actual data-persistence related responsibilities to a number of _aggregate stores_. The repository itself is then just a thin wrapper over those aggregate stores, making it easier to work with aggregate stored in different persistence backends by providing a single unified API for them while also handing some of the concepts related to domain repositories – like the unit-of-work pattern and event publishing. The actual definition of the interface \(which is listed below\) is kept to a bare minimum and offers only very basic features that are crucially needed for loading and saving aggregates, abstracting from the underlying database technology. This is in contrast with CRUD data repositories which on the other hand try to offer maximum flexibility when working with data, putting a minimum barrier between developer and the database \(see following subsection on CRUD repositories\).
+In terms of domain-driven design, `IRepository` \(defined in Revo.Infrastructure module\) is the high-level repository that would be used in the command handlers for the write side of the application working with the domain model.
 
-The repository takes full advantage of .NET support of interface generic methods and declares all methods as such, simplifying all repository interactions to just one universal interface. When querying for an entity, the repository itself then tries to deduce the aggregate store it belongs \(would belong to\). The actual detection logic is implemented by the aggregate stores. When the correct aggregate store is found, the repository delegates the actual persistence work \(loading, saving, querying…\) to it.
+{% hint style="info" %}
+The implementation of `IRepository` interface is not bound to any specific database system backend \(or an ORM library\) and instead delegates most of the actual data-persistence related responsibilities to different _aggregate stores -_ i.e. **event sourced aggregate store** or **CRUD aggregate store**. The repository itself is then just a thin wrapper over those aggregate stores, making it easier to work with aggregate stored in different persistence backends by providing a single unified API for them while also handing some of the concepts related to domain repositories – like the unit-of-work pattern and event publishing.
+{% endhint %}
+
+The repository declares all methods as generic, simplifying all repository interactions to just one universal interface. When querying for an entity, the repository itself then tries to deduce the aggregate store it belongs. When the correct aggregate store is found, the repository delegates the actual persistence work \(loading, saving, querying…\) to it.
 
 To enforce aggregate consistency boundaries on compliance with DDD rules, repositories only allow working with aggregate roots, which is enforced by generic type constraints for all its generic methods \(requiring any `IAggregateRoot` descendant\). This prevents breaking the encapsulation of aggregates by querying and manually modifying single aggregate entities separately.
-
-{% hint style="success" %}
-Because of its generic nature, it is not a true repository that would be a part of the domain according to DDD as discussed previously \(i.e. with a meaning pertaining to a specific domain part, defining its queries for specific aggregates in ubiquitous language\). Rather, it is a service wrapping some of the complexities behind the persistence of aggregates and entities, providing a reasonable amount of universal abstraction over different persistence mechanism and entity handling \(e.g. publishing events to event bus\). However, if one wanted to create a repository in a DDD-fashion \(with custom queries for specific aggregates, etc.\), he should be able to use this universal `IRepository` as a base for its implementation.
-{% endhint %}
 
 Following  abridged code snippet of `IRepository` interface definition shows some of the basic functionality it offers for working with aggregates.
 
@@ -50,8 +50,6 @@ Besides the common functionality of adding and removing aggregate roots and find
 
 Aggregate changes are automatically persisted upon saving the repository. It is unnecessary to call the save method explicitly as the repository implements a unit of work provider, which means it gets automatically saved when the unit of work is committed at the end of the command processing \(unless any unhandled exceptions are thrown\). The mechanism for detecting changes in the entities depends on the actual aggregate store implementation \(e.g. event sourced entities are saved when they published any new uncommitted events, while changes in entities persisted by Entity Framework rely on its own internal change tracking mechanism\).
 
-There are currently two aggregate stores implemented. The developer does need to directly manipulate with the aggregate stores, but he needs to know their underlying technology.
-
 #### CRUD aggregate store
 
 CRUD aggregate store is not tied to single specific database technology and is just a thin layer on top of ICrudRepository. CRUD data repository is the second type of repositories providing a more direct access to databases without the constraints of the domain and is in-depth discussed in chapter 5.5. All the persistence-specific features of their implementations \(e.g. the mapping of entities to database\) also apply to aggregates accessed via this aggregate store.
@@ -74,7 +72,7 @@ Most of the read-related functionality of `ICrudRepository` is actually defined 
 
 Most of the CRUD repository implementations will also define its own repository interfaces derived from `ICrudRepository` in order to facilitate the use of the features specific to its technology \(for example, `IEFCoreCrudRepository` making it possible to directly work with some of the EF Core ORM features\).
 
-Both types of repositories also offer an in-memory implementation of their interfaces that are suitable for testing purposes. For more information about this, see chapter 7.15.
+Both types of repositories also offer an in-memory implementation of their interfaces that are suitable for testing purposes. For more information about this, see [Testing](testing.md).
 
 ## Repository filters
 
@@ -83,17 +81,13 @@ All repositories in Revo framework also support the concept of repository filter
 * tenant repository filter \(see [multi-tenancy support](multi-tenancy.md)\),
 * authorization repository filter \(see [how to implement authorization](authorization.md)\).
 
-CRUD data persistence using EF6/MSSQL
 
-First data persistence backend \(usable for both non-event-sourced aggregates with IRepository and any other CRUD data access with `ICrudRepository`\) is implemented using Entity Framework 6 object-relational mapper \(also abbreviated as EF6\). EF6 provides out-of-box support for MSSQL databases and a number of other database systems when using third-party database providers . Revo framework primarily supports code-first mapping of entities using C\# attributes, mapping all entities annotated with DatabaseEntityAttribute. Besides Entity Framework’s default naming conventions, it is also possible to annotate entity class with `TablePrefixAttribute` specifying a prefix for SQL table name and a common common prefix for all of its column names. In case these automatic mapping features were not enough, the framework also scans all referenced assemblies from class implementing IModelDefinition making it easily possible to customize the mapping upon the creation of the internal DbContext.
-
-Revo.DataAccess.EF6 also defines an `IEF6CrudRepository` interface, which extends the `ICrudRepository` and adds facilities for working with some of the EF6-specific features like working with ORM entries of entities, their change tracking, or delayed loading of collections.
 
 ## Event stores
 
-### MSSQL event store
+### SQL event store
 
-The framework default event store implementation is based on MSSQL database that is internally accessed using Entity Framework 6. It stores individual events as table rows. To implement optimistic concurrency, the database schema enforces that events have unique sequence numbers in their event stream.
+TODO
 
 
 
