@@ -11,7 +11,7 @@ description: >-
 Using this simple application, one should be able to track his tasks to do. User can create task lists, to which tasks \(to-dos\) can be added \(and later modified, deleted or marked as 'done'\).
 
 {% hint style="success" %}
-You can also instantly instantly download the complete application by cloning the Github repository: [https://github.com/revoframework/Revo/tree/develop/Examples/Todos](https://github.com/revoframework/Revo/tree/develop/Examples/Todos)
+You can also instantly download the complete application by cloning the Github repository: [https://github.com/revoframework/Revo/tree/develop/Examples/Todos](https://github.com/revoframework/Revo/tree/develop/Examples/Todos)
 {% endhint %}
 
 ## 1. Create a new ASP.NET Core application in Visual Studio
